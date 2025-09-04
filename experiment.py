@@ -2,15 +2,21 @@ import csv
 import statistics
 import random
 import time
+import argparse
 from typing import Callable, List, Dict
 from sorting_algorithms import selection_sort, merge_sort, insertion_sort
 
 # ====== CONFIG ======
-SEED = 42
-NS = [100, 500, 1000, 50000]   # you can append larger n if your machine can handle it
-TRIALS = 5
+DEFAULT_SEED = 42
+NS = [100, 500, 1000, 5000]   # you can append larger n if your machine can handle it
+DEFAULT_TRIALS = 5
 REPEAT_PER_TRIAL = 1  # increase automatically if times are too small
 # ====================
+
+parser = argparse.ArgumentParser(description="Run sorting experiments with fixed seed and trials.")
+parser.add_argument("--seed", type=int, default=DEFAULT_SEED, help="Random seed (default 42).")
+parser.add_argument("--trials", type=int, default=DEFAULT_TRIALS, help="Number of trials per test.")
+args = parser.parse_args()
 
 Algo = Callable[[List[int]], List[int]]
 
@@ -40,7 +46,7 @@ def time_trial(algo: Algo, data: List[int], repeat: int) -> float:
     return total / repeat
 
 def run():
-    rng = random.Random(SEED)
+    rng = random.Random(args.seed)
     results: List[Dict[str, str]] = []
 
     algos = {
@@ -52,7 +58,7 @@ def run():
     for n in NS:
         for name, fn in algos.items():
             trial_times: List[float] = []
-            for t in range(TRIALS):
+            for t in range(args.trials):
                 # fresh permutation each trial; seed is fixed overall for reproducibility
                 data = make_permutation(n, rng)
                 tsec = time_trial(fn, data, REPEAT_PER_TRIAL)
